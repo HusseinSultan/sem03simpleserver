@@ -1,3 +1,4 @@
+
 package main
 
 import (
@@ -6,6 +7,7 @@ import (
 	"net"
       	"sync"
         "github.com/HusseinSultan/is105sem03/mycrypt"
+	"github.com/HusseinSultan/funtemps/conv"
 )
 
 func main() {
@@ -41,8 +43,21 @@ func main() {
 					log.Println("Dekrypter melding: ", string(dekryptertMelding))
  					switch msg := string(dekryptertMelding); msg {
   				        case "ping":
-						_, err = c.Write([]byte("pong"))
-					default:
+						kryptertMelding := mycrypt.Krypter([]rune("pong"), mycrypt.ALF_SEM03, 4)
+                                        log.Println("Kryptert melding: ", string(kryptertMelding))
+                                        _, err = conn.Write([]byte(string(kryptertMelding)))
+					case "kjevik":
+						celsiusStr := "20" // bare for testing, erstatt med din egen logikk for å hente celsiusverdien
+						celsius, err := conv.ParseFloat(celsiusStr)
+						if err != nil {
+							kryptertMelding := mycrypt.Krypter([]rune("Invalid temperature value"), mycrypt.ALF_SEM03, 26)
+							_, err = conn.Write([]byte(string(kryptertMelding)))
+						} else {
+							fahrenheit := conv.CelsiusToFahrenheit(celsius)
+							response := fmt.Sprintf("%.2f degrees Fahrenheit", fahrenheit)
+							kryptertMelding := mycrypt.Krypter([]rune(response), mycrypt.ALF_SEM03, len(response))
+							_, err = conn.Write([]byte(string(kryptertMelding)))
+						}       					default:
 						_, err = c.Write(buf[:n])
 					}
 					if err != nil {
